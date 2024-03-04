@@ -28,3 +28,18 @@ resource "digitalocean_droplet" "web" {
   ssh_keys  = [digitalocean_ssh_key.web.id]
   user_data = file("${path.module}/files/user-data.sh")
 }
+
+resource "digitalocean_loadbalancer" "public" {
+  name   = "terraformLB"
+  region = "fra1"
+
+  forwarding_rule {
+    entry_port     = 80
+    entry_protocol = "http"
+
+    target_port     = 8080
+    target_protocol = "http"
+  }
+
+  droplet_ids = digitalocean_droplet.web.*.id
+}

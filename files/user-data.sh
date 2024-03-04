@@ -63,9 +63,9 @@ apt-mark hold kubelet kubeadm kubectl
 kubeadm config images pull
 
 # start kubernetes
-kubeadm init ##--ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem
+kubeadm init 
 export KUBECONFIG=/etc/kubernetes/admin.conf
-systemctl restart kubelet.service
+
 
 
 

@@ -7,6 +7,18 @@ terraform {
   }
 }
 
+# provider kubernetes added for later
+provider "kubernetes" {
+  config_path = var.kube_config_path
+}
+
+# decided to use Helm packages
+provider "helm" {
+  kubernetes {
+    config_path = var.kube_config_path
+  }
+}
+
 # digitalocean provider resource and token
 provider "digitalocean" {
   token = var.do_token
@@ -38,23 +50,10 @@ resource "digitalocean_droplet" "web" {
 
     inline = [
       "echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc",
-      #"source /root/.bashrc"
+      "source /root/.bashrc"
     ]
   }
 }
 output "droplet_ips" {
   value = [for droplet in digitalocean_droplet.web : droplet.ipv4_address]
-}
-
-# provider kubernetes added for later
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
-
-# decided to use Helm packages
-
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/config"
-  }
 }

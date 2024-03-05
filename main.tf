@@ -13,7 +13,7 @@ provider "digitalocean" {
 
 
 resource "digitalocean_ssh_key" "web" {
-  name       = "eb app SSH key"
+  name       = "web app SSH key"
   public_key = file("${path.module}/files/id_rsa.pub")
 }
 
@@ -27,4 +27,27 @@ resource "digitalocean_droplet" "web" {
   size      = "s-2vcpu-2gb"
   ssh_keys  = [digitalocean_ssh_key.web.id]
   user_data = file("${path.module}/files/user-data.sh")
+}
+
+output "droplet_ips" {
+  value = [for droplet in digitalocean_droplet.web : droplet.ipv4_address]
+}
+
+# provider kubernetes added for later
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    name = "argocd"
+  }
+}
+
+# decided to use Helm packages
+
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
 }

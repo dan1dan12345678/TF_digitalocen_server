@@ -7,14 +7,13 @@ terraform {
   }
 }
 
+# digitalocean provider resource and token
 provider "digitalocean" {
   token = var.do_token
 }
-
-
-resource "digitalocean_ssh_key" "web" {
-  name       = "web app SSH key"
-  public_key = file("${path.module}/files/id_rsa.pub")
+resource "digitalocean_ssh_key" "terraform_ssh_key" {
+  name       = "Terraform Example Key"
+  public_key = file("${path.module}/files/terraform-ssh-key.pub")
 }
 
 
@@ -25,10 +24,24 @@ resource "digitalocean_droplet" "web" {
   name      = "terraformtest-${count.index}"
   region    = "fra1"
   size      = "s-2vcpu-2gb"
-  ssh_keys  = [digitalocean_ssh_key.web.id]
+  ssh_keys  = [digitalocean_ssh_key.terraform_ssh_key.fingerprint]
   user_data = file("${path.module}/files/user-data.sh")
-}
 
+  # using SSH to connect and add the kubeconfig to bashrc ROOT
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "root"
+      private_key = file("${path.module}/files/terraform-ssh-key")
+      host        = self.ipv4_address
+    }
+
+    inline = [
+      "echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc",
+      #"source /root/.bashrc"
+    ]
+  }
+}
 output "droplet_ips" {
   value = [for droplet in digitalocean_droplet.web : droplet.ipv4_address]
 }
@@ -36,12 +49,6 @@ output "droplet_ips" {
 # provider kubernetes added for later
 provider "kubernetes" {
   config_path = "~/.kube/config"
-}
-
-resource "kubernetes_namespace" "argocd" {
-  metadata {
-    name = "argocd"
-  }
 }
 
 # decided to use Helm packages

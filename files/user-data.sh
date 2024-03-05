@@ -68,10 +68,15 @@ kubeadm init
 # start cluster
 
 mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf cat 
-#sudo chown $(id -u):$(id -g) $HOME/.kube/config
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
+
+# helm install
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+
 
 
 

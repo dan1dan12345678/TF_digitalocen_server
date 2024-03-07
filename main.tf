@@ -31,7 +31,7 @@ resource "digitalocean_ssh_key" "terraform_ssh_key" {
 
 # Create a new Web Droplet in the fra1 region
 resource "digitalocean_droplet" "web" {
-  count     = 1
+  count     = 3
   image     = "ubuntu-22-04-x64"
   name      = "terraformtest-${count.index}"
   region    = "fra1"
@@ -46,13 +46,15 @@ resource "digitalocean_droplet" "web" {
       user        = "root"
       private_key = file("${path.module}/files/terraform-ssh-key")
       host        = self.ipv4_address
-    }
-
-    inline = [
-      "echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc",
-      "source /root/.bashrc"
-    ]
+  
   }
+  inline = [
+    "echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc",
+    "source /root/.bashrc",
+    "echo 'Kubeconfig contents:'",
+    "cat /etc/kubernetes/admin.conf"
+  ]
+}
 }
 output "droplet_ips" {
   value = [for droplet in digitalocean_droplet.web : droplet.ipv4_address]

@@ -5,8 +5,11 @@
 terraform apply
 
 ls -ls ./kubeconfig
+
 # add from server to local kubernetes the kubeconfig 
+
 cat ./kubeconfig
+
 export KUBECONFIG=./kubeconf
 
 # on master nodes run the join after creation

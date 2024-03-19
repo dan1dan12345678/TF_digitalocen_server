@@ -10,11 +10,6 @@ variable "kube_config_path" {
   default     = "/etc/kubernetes/admin.conf"
 }
 
-
-
-
-
-
 #######
 variable "argo_namespace" {
   description = "The name of the namespace for ArgoCD deployments"
